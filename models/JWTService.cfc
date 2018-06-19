@@ -2,6 +2,7 @@ component singleton {
 	
 	/* 
 		Available algorithms: 
+			Forked from here: https://github.com/garyhiscox/cb-jwt/blob/master/models/JWTService.cfc
 
 			* HmacSHA256
 			* HmacSHA384
@@ -25,7 +26,7 @@ component singleton {
 		var signiture 	= ListGetAt( arguments.token , 3 , "." );
 
 		var signInput = ListGetAt( arguments.token , 1 , "." ) & "." & ListGetAt( arguments.token , 2 , "." );
-		if ( signiture != _sign( signInput , arguments.key , variables.instance.algorithmMap[arguments.algorithm] )) {
+		if ( signiture != _sign( signInput , arguments.key , arguments.algorithm )) {
 			throw( type="Invalid Token" , message="Signiture verification failed");
 		}
 
@@ -39,14 +40,14 @@ component singleton {
 		segments = ListAppend( segments , _base64UrlEscape( toBase64( serializeJSON( { "typ" =  "JWT", "alg" = arguments.algorithm } ))) , "." );
 		segments = ListAppend( segments , _base64UrlEscape( toBase64( serializeJSON( arguments.payload ))) , "." );
 		segments = ListAppend( segments , _sign( segments , arguments.key , arguments.algorithm ) , "." );
-		
+
 		return segments;
 	}
 
 	function verify( required string token, required string key , string algorithm="HS512" ) {
 		var isValid = true;
 		try {
-			decode( arguments.token, arguments.key , variables.instance.algorithmMap[arguments.algorithm] );
+			decode( arguments.token, arguments.key , arguments.algorithm );
 		}
 		catch(any e) {
 			isValid = false;
